@@ -63,7 +63,7 @@ project/
 
 ### 1. Клонировать репозиторий
 ```bash
-git clone https://github.com/yourname/chatgpt_telegram_bot
+git clone https://github.com/Eygenio/Telegram_Bot_with_ChatGPT
 cd chatgpt_telegram_bot
 ```
 

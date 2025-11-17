@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 # Загружаем переменные окружения
 load_dotenv()
 
+
 class Config:
     # Telegram
     BOT_TOKEN = os.getenv("TELEGRAM_TOKEN")

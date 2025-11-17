@@ -15,28 +15,24 @@ class ChatGPTClient:
         self.api_url = "https://api.openai.com/v1/responses"
 
     async def ask(
-        self,
-        prompt: str,
-        history_id: Optional[str] = None
+        self, prompt: str, history_id: Optional[str] = None
     ) -> Tuple[str, Optional[str], Optional[str]]:
 
         headers = {
             "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
-        payload = {
-            "model": self.model,
-            "input": prompt,
-            "store": True
-        }
+        payload = {"model": self.model, "input": prompt, "store": True}
 
         if history_id:
             payload["history_id"] = history_id
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(self.api_url, headers=headers, json=payload) as resp:
+                async with session.post(
+                    self.api_url, headers=headers, json=payload
+                ) as resp:
                     data = await resp.json()
 
                     if resp.status != 200:

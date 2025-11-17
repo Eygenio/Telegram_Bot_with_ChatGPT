@@ -18,21 +18,15 @@ db = Database()
 client = ChatGPTClient()
 
 
-# ===================
 # HELPER: Клавиатура
-# ===================
 def get_main_keyboard():
     keyboard = [
         [types.KeyboardButton(text="🆕 Новый запрос")],
     ]
-    return types.ReplyKeyboardMarkup(
-        keyboard=keyboard,
-        resize_keyboard=True
-    )
+    return types.ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
 
-# ===================
+
 # /start
-# ===================
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     user_id = message.from_user.id
@@ -40,20 +34,18 @@ async def cmd_start(message: types.Message):
     # Создаем/обновляем запись пользователя
     db.save_user(user_id)
 
-    #Сбрасываем историю
+    # Сбрасываем историю
     db.set_history_id(user_id, None)
 
     await message.answer(
         "Привет! Я умный ассистент ⚡\n"
         "Задавай вопрос — я отвечу.\n\n"
         "Контекст диалога будет сохраняться автоматически.",
-        reply_markup=get_main_keyboard()
+        reply_markup=get_main_keyboard(),
     )
 
 
-# ===================
 # /help
-# ===================
 @dp.message(Command("help"))
 async def cmd_help(message: types.Message):
     await message.answer(
@@ -62,23 +54,19 @@ async def cmd_help(message: types.Message):
     )
 
 
-# ===================
 # Кнопка "Новый запрос"
-# ===================
 @dp.message(lambda msg: msg.text == "🆕 Новый запрос")
 async def new_dialog(message: types.Message):
     user_id = message.from_user.id
     db.set_history_id(user_id, None)
 
     await message.answer(
-        "Диалог начат заново! 🆕\n"
-        "Можешь задавать новый вопрос.",
-        reply_markup=get_main_keyboard()
+        "Диалог начат заново! 🆕\n" "Можешь задавать новый вопрос.",
+        reply_markup=get_main_keyboard(),
     )
 
-# ===================
+
 # Обработка всех сообщений
-# ===================
 async def handle_message(message: types.Message):
     user_id = message.from_user.id
     user_text = message.text.strip()
@@ -94,8 +82,7 @@ async def handle_message(message: types.Message):
     try:
         # Отправляем запрос в ChatGPT
         response_text, new_history_id, response_id = await client.ask(
-            prompt=user_text,
-            history_id=history_id
+            prompt=user_text, history_id=history_id
         )
 
         # Сохраняем новый history_id (если он есть)
@@ -108,21 +95,18 @@ async def handle_message(message: types.Message):
             role="user",
             content=user_text,
             history_id=new_history_id or history_id,
-            response_id=response_id
+            response_id=response_id,
         )
         db.save_message(
             user_id=user_id,
             role="assistant",
             content=response_text,
             history_id=new_history_id or history_id,
-            response_id=response_id
+            response_id=response_id,
         )
 
         # Отправляем ответ
-        await message.answer(
-            response_text,
-            reply_markup=get_main_keyboard()
-        )
+        await message.answer(response_text, reply_markup=get_main_keyboard())
 
     except Exception as e:
         logger.exception(f"Ошибка обработки сообщения: {e}")
@@ -132,14 +116,16 @@ async def handle_message(message: types.Message):
             "Попробуйте снова через несколько секунд."
         )
 
+
 dp.message()(handle_message)
 
-# ===================
+
 # main
-# ===================
 async def main():
     await dp.start_polling(bot)
 
+
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())

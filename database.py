@@ -11,31 +11,29 @@ class Database:
         self.path = path
         self._create_tables()
 
-    # ===========================
     # CONNECT
-    # ===========================
     def _connect(self):
         return sqlite3.connect(self.path)
 
-    # ===========================
     # CREATE TABLET
-    # ===========================
-
     def _create_tables(self):
         try:
             with self._connect() as conn:
                 cursor = conn.cursor()
 
                 # Таблица пользователей
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE TABLE IF NOT EXISTS users (
                         user_id INTEGER PRIMARY KEY,
                         history_id TEXT
                     )
-                """)
+                """
+                )
 
                 # Таблица сообщений
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE TABLE IF NOT EXISTS messages (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         user_id INTEGER,
@@ -45,14 +43,13 @@ class Database:
                         response_id,
                         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
                     )
-                """)
+                """
+                )
                 conn.commit()
         except Exception as e:
             logger.error(f"Ошибка при создании таблицы: {e}")
 
-    # ===========================
     # USER OPERATIONS
-    # ===========================
     def save_user(self, user_id: int):
         """
         Добавляем пользователя, если его нет.
@@ -65,7 +62,8 @@ class Database:
                 exists = cursor.fetchone()
 
                 if not exists:
-                    cursor.execute("INSERT INTO users(user_id, history_id) VALUES (?, ?)",
+                    cursor.execute(
+                        "INSERT INTO users(user_id, history_id) VALUES (?, ?)",
                         (user_id, None)
                     )
                     conn.commit()
@@ -80,14 +78,14 @@ class Database:
         try:
             with self._connect() as conn:
                 cursor = conn.cursor()
-                cursor.execute("UPDATE users SET history_id=? WHERE user_id=?",
+                cursor.execute(
+                    "UPDATE users SET history_id=? WHERE user_id=?",
                     (history_id,user_id)
                 )
                 conn.commit()
         except Exception as e:
             logger.error(f"Ошибка set_history_id: {e}")
             return None
-
 
     def get_history_id(self, user_id: int) -> Optional[str]:
         """
@@ -96,8 +94,8 @@ class Database:
         try:
             with self._connect() as conn:
                 cursor = conn.cursor()
-                cursor.execute("SELECT history_id FROM users WHERE user_id=?",
-                    (user_id,)
+                cursor.execute(
+                    "SELECT history_id FROM users WHERE user_id=?", (user_id,)
                 )
                 row = cursor.fetchone()
                 return row[0] if row else None
@@ -106,15 +104,14 @@ class Database:
             logger.error(f"Ошибка get_history_id: {e}")
             return None
 
-
-    # ===========================
     # SAVE MESSAGE
-    # ===========================
     def save_message(
-            self, user_id: int,
-            role: str, content: str,
-            history_id: Optional[str],
-            response_id: Optional[str]
+        self,
+        user_id: int,
+        role: str,
+        content: str,
+        history_id: Optional[str],
+        response_id: Optional[str]
     ):
         """
         Сохраняет сообщения.
